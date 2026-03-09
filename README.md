@@ -3,3 +3,4 @@ Delete messages, Purge bot for betterdiscord. Not sure how it works. Use Ctrl+Al
 also wsp thx for downloading my thingy. so like if you need something just find a way to contact me. alr guys
 so i named it UserPurge anyways thx pls dont steal my work tho
 👌👌👌
+special thanks to lighty, a betterdiscord plugin developer i used parts of his code
