@@ -13,7 +13,6 @@
   var fs = new ActiveXObject('Scripting.FileSystemObject');
   var pathPlugins = shell.ExpandEnvironmentStrings('%APPDATA%\\BetterDiscord\\plugins');
   var pathSelf = WScript.ScriptFullName;
-  // Notify user
   shell.Popup("Do not run this directly. Put it in your plugins folder.", 0, "UserPurge", 0x30);
   if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
     shell.Popup("I’m already in the correct folder.\nJust enable me in BetterDiscord settings.", 0, "UserPurge", 0x40);
@@ -25,7 +24,7 @@
     shell.Popup("UserPurge installed!\nEnable it in BetterDiscord settings.", 0, "UserPurge", 0x40);
   }
   WScript.Quit();
-@else @*/
+@end @*/
 
 module.exports = (() => {
     const config = {
@@ -87,7 +86,6 @@ module.exports = (() => {
             if (document.getElementById("userpurge-ui")) return;
 
             const users = this.getDMUsers();
-
             let options = users.map(u => `<option value="${u.channelId}">${u.name}</option>`).join("");
 
             const ui = document.createElement("div");
@@ -180,7 +178,6 @@ module.exports = (() => {
                 const isMine = msg.querySelector('[class*="isAuthor"]');
                 if (!isMine) continue;
 
-                // SAFELY check closest parentChannel
                 const parentChannel = msg.closest('[data-list-id]');
                 if (!parentChannel?.dataset?.listId || parentChannel.dataset.listId !== channelId) continue;
 
