@@ -1,11 +1,11 @@
 /**
  * @name UserPurge
- * @description Purge your visible DM messages with a popup UI
+ * @description Delete your visible DM messages with a popup menu
  * @version 1.0.0
  * @author You
-*/
+ */
 
-class SafeDMPurge {
+module.exports = class UserPurge {
 
     start() {
         this.running = false;
@@ -47,7 +47,6 @@ class SafeDMPurge {
                     name: user.username
                 });
             }
-
         }
 
         return users;
@@ -55,7 +54,7 @@ class SafeDMPurge {
 
     openUI() {
 
-        if (document.getElementById("purge-ui")) return;
+        if (document.getElementById("userpurge-ui")) return;
 
         const users = this.getDMUsers();
 
@@ -65,7 +64,7 @@ class SafeDMPurge {
         });
 
         const ui = document.createElement("div");
-        ui.id = "purge-ui";
+        ui.id = "userpurge-ui";
 
         ui.innerHTML = `
         <div style="
@@ -83,7 +82,7 @@ class SafeDMPurge {
         font-family:sans-serif;
         ">
 
-        <h3>DM Message Purge</h3>
+        <h3>UserPurge</h3>
 
         <select id="purge-user" style="width:100%;margin-bottom:10px;">
         ${options}
@@ -121,7 +120,7 @@ class SafeDMPurge {
     }
 
     removeUI() {
-        const ui = document.getElementById("purge-ui");
+        const ui = document.getElementById("userpurge-ui");
         if (ui) ui.remove();
     }
 
@@ -140,7 +139,6 @@ class SafeDMPurge {
         for (const msg of messages) {
 
             if (!this.running) break;
-
             if (deleted >= limit) break;
 
             const mine = msg.querySelector('[class*="isAuthor"]');
@@ -169,16 +167,14 @@ class SafeDMPurge {
 
             deleted++;
 
-            progress.innerText = `Deleted: ${deleted}`;
+            progress.innerText = "Deleted: " + deleted;
 
             await new Promise(r => setTimeout(r,400));
         }
 
-        progress.innerText = `Finished. Deleted ${deleted}`;
+        progress.innerText = "Finished. Deleted " + deleted;
 
         this.running = false;
     }
 
-}
-
-module.exports = SafeDMPurge;
+};
