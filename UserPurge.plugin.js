@@ -74,7 +74,6 @@ module.exports = (() => {
             for (let id of dms) {
                 const channel = ChannelStore.getChannel(id);
                 if (!channel || !channel.recipients) continue;
-
                 const user = UserStore.getUser(channel.recipients[0]);
                 if (user) users.push({ id: user.id, name: user.username, channelId: id });
             }
