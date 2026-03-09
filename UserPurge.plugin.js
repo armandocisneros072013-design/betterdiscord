@@ -13,7 +13,17 @@
   var fs = new ActiveXObject('Scripting.FileSystemObject');
   var pathPlugins = shell.ExpandEnvironmentStrings('%APPDATA%\\BetterDiscord\\plugins');
   var pathSelf = WScript.ScriptFullName;
+  // Notify user
   shell.Popup("Do not run this directly. Put it in your plugins folder.", 0, "UserPurge", 0x30);
+  if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
+    shell.Popup("I’m already in the correct folder.\nJust enable me in BetterDiscord settings.", 0, "UserPurge", 0x40);
+  } else if (!fs.FolderExists(pathPlugins)) {
+    shell.Popup("Cannot find the BetterDiscord plugins folder.\nAre you sure BetterDiscord is installed?", 0, "UserPurge", 0x10);
+  } else if (shell.Popup("Copy UserPurge to the plugins folder?", 0, "UserPurge Installer", 0x34) === 6) {
+    fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
+    shell.Exec('explorer ' + pathPlugins);
+    shell.Popup("UserPurge installed!\nEnable it in BetterDiscord settings.", 0, "UserPurge", 0x40);
+  }
   WScript.Quit();
 @else @*/
 
@@ -170,8 +180,9 @@ module.exports = (() => {
                 const isMine = msg.querySelector('[class*="isAuthor"]');
                 if (!isMine) continue;
 
+                // SAFELY check closest parentChannel
                 const parentChannel = msg.closest('[data-list-id]');
-                if (!parentChannel || parentChannel.dataset.listId !== channelId) continue;
+                if (!parentChannel?.dataset?.listId || parentChannel.dataset.listId !== channelId) continue;
 
                 const menu = msg.querySelector('[aria-label="More"]');
                 if (!menu) continue;
@@ -198,6 +209,5 @@ module.exports = (() => {
             progress.innerText = `Finished. Deleted ${deleted}`;
             this.running = false;
         }
-
     };
 })();
