@@ -1,13 +1,14 @@
 /**
- * @name DMPurge
- * @description Delete your messages in DMs through a UI
+ * @name UserPurge
+ * @description Purge your visible DM messages with a popup UI
  * @version 1.0.0
  * @author You
- */
+*/
 
-module.exports = class DMPurge {
+class SafeDMPurge {
 
     start() {
+        this.running = false;
         this.keyHandler = this.keyHandler.bind(this);
         document.addEventListener("keydown", this.keyHandler);
     }
@@ -18,21 +19,19 @@ module.exports = class DMPurge {
     }
 
     keyHandler(e) {
-
         if (e.ctrlKey && e.altKey && e.key === "Tab") {
             e.preventDefault();
             this.openUI();
         }
-
     }
 
     getDMUsers() {
 
-        const dms = BdApi.Webpack.getStore("PrivateChannelStore").getPrivateChannelIds();
-
-        const UserStore = BdApi.Webpack.getStore("UserStore");
+        const PrivateChannelStore = BdApi.Webpack.getStore("PrivateChannelStore");
         const ChannelStore = BdApi.Webpack.getStore("ChannelStore");
+        const UserStore = BdApi.Webpack.getStore("UserStore");
 
+        const dms = PrivateChannelStore.getPrivateChannelIds();
         const users = [];
 
         for (let id of dms) {
@@ -52,22 +51,21 @@ module.exports = class DMPurge {
         }
 
         return users;
-
     }
 
     openUI() {
 
-        if (document.getElementById("dm-purge-ui")) return;
+        if (document.getElementById("purge-ui")) return;
 
         const users = this.getDMUsers();
 
-        const options = users.map(u =>
-            `<option value="${u.id}">${u.name}</option>`
-        ).join("");
+        let options = "";
+        users.forEach(u => {
+            options += `<option value="${u.id}">${u.name}</option>`;
+        });
 
         const ui = document.createElement("div");
-
-        ui.id = "dm-purge-ui";
+        ui.id = "purge-ui";
 
         ui.innerHTML = `
         <div style="
@@ -77,73 +75,110 @@ module.exports = class DMPurge {
         transform:translate(-50%,-50%);
         background:#2b2d31;
         padding:20px;
-        border-radius:10px;
-        z-index:9999;
-        width:320px;
+        border-radius:12px;
+        width:340px;
         text-align:center;
+        z-index:9999;
+        color:white;
+        font-family:sans-serif;
         ">
 
-        <h3 style="color:white;">DM Message Purge</h3>
+        <h3>DM Message Purge</h3>
 
-        <select id="dm-user-select" style="width:100%;margin-bottom:10px;">
+        <select id="purge-user" style="width:100%;margin-bottom:10px;">
         ${options}
         </select>
 
-        <input id="dm-count" type="number" placeholder="Amount of messages"
-        style="width:100%;margin-bottom:10px;">
+        <input id="purge-count" type="number"
+        placeholder="Messages to delete"
+        style="width:100%;margin-bottom:10px;padding:5px;">
 
-        <button id="dm-delete">Delete Messages</button>
-        <button id="dm-delete-all">Delete All</button>
+        <button id="purge-start">Start</button>
+        <button id="purge-cancel">Cancel</button>
 
-        <br><br>
+        <p id="purge-progress">Idle</p>
 
-        <button id="dm-close">Close</button>
+        <button id="purge-close">Close</button>
 
         </div>
         `;
 
         document.body.appendChild(ui);
 
-        document.getElementById("dm-close").onclick = () => this.removeUI();
+        document.getElementById("purge-close").onclick = () => this.removeUI();
 
-        document.getElementById("dm-delete").onclick = () => {
+        document.getElementById("purge-start").onclick = () => {
 
-            const count = parseInt(document.getElementById("dm-count").value);
-            const user = document.getElementById("dm-user-select").value;
-
+            const count = parseInt(document.getElementById("purge-count").value);
             if (!count) return;
 
-            this.deleteMessages(user, count);
-
+            this.deleteVisible(count);
         };
 
-        document.getElementById("dm-delete-all").onclick = () => {
-
-            const user = document.getElementById("dm-user-select").value;
-
-            this.deleteMessages(user, 999999);
-
+        document.getElementById("purge-cancel").onclick = () => {
+            this.running = false;
         };
-
     }
 
     removeUI() {
-
-        const ui = document.getElementById("dm-purge-ui");
-
+        const ui = document.getElementById("purge-ui");
         if (ui) ui.remove();
-
     }
 
-    async deleteMessages(userId, limit) {
+    async deleteVisible(limit) {
 
-        console.log("Deleting messages with:", userId);
+        if (this.running) return;
 
-        // Placeholder
-        // Actual deletion requires message search + API calls
+        this.running = true;
 
-        alert("Delete logic placeholder — can be expanded.");
+        let deleted = 0;
 
+        const progress = document.getElementById("purge-progress");
+
+        const messages = document.querySelectorAll('[id^="chat-messages"]');
+
+        for (const msg of messages) {
+
+            if (!this.running) break;
+
+            if (deleted >= limit) break;
+
+            const mine = msg.querySelector('[class*="isAuthor"]');
+            if (!mine) continue;
+
+            const menu = msg.querySelector('[aria-label="More"]');
+            if (!menu) continue;
+
+            menu.click();
+
+            await new Promise(r => setTimeout(r,200));
+
+            const del = [...document.querySelectorAll('[role="menuitem"]')]
+                .find(x => x.textContent.toLowerCase().includes("delete"));
+
+            if (!del) continue;
+
+            del.click();
+
+            await new Promise(r => setTimeout(r,200));
+
+            const confirm = [...document.querySelectorAll("button")]
+                .find(x => x.textContent.toLowerCase() === "delete");
+
+            if (confirm) confirm.click();
+
+            deleted++;
+
+            progress.innerText = `Deleted: ${deleted}`;
+
+            await new Promise(r => setTimeout(r,400));
+        }
+
+        progress.innerText = `Finished. Deleted ${deleted}`;
+
+        this.running = false;
     }
 
 }
+
+module.exports = SafeDMPurge;
