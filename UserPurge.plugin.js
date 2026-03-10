@@ -1,8 +1,8 @@
 /**
+ * UserPurge v1 – Delete your messages in DMs
  * @name UserPurge
  * @version 1.0.0
- * @invite N/A
- * @donate N/A
+ * @description Delete your messages in DMs with a selected user. Searchable dropdown, progress bar, cancel button.
  * @website https://github.com/yourusername/UserPurge
  * @source https://github.com/yourusername/UserPurge/UserPurge.plugin.js
  * @updateUrl https://raw.githubusercontent.com/yourusername/UserPurge/main/UserPurge.plugin.js
@@ -37,7 +37,6 @@ module.exports = (() => {
     };
 
     return class UserPurge {
-
         getName() { return config.info.name; }
         getVersion() { return config.info.version; }
         getAuthor() { return config.info.authors.map(a => a.name).join(", "); }
