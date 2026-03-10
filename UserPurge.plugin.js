@@ -1,5 +1,6 @@
 /**
- * UserPurge v1 – Delete your messages in DMs
+ * 
+ * UserPurge v1 - Delete your messages in DMs
  * @name UserPurge
  * @version 1.0.0
  * @website https://github.com/yourusername/UserPurge
